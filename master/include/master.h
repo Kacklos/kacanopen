@@ -68,8 +68,8 @@ namespace kaco {
 		///                 "1M", "500K", "125K", "100K", "50K", "20K", "10K" and "5K".
 		/// \returns true if successful
 		/// \remark Master must not run yet.
-		bool start(const std::string busname, const std::string& baudrate);
-		
+		bool start(CANBUSDevice device, const std::string busname, const std::string& baudrate);
+
 		/// Starts master and creates Core.
 		///	\param busname Name of the bus which will be passed to the CAN driver, e.g. slcan0
 		///	\param baudrate Baudrate in 1/s. The value will be passed to the CAN driver in string
@@ -78,8 +78,8 @@ namespace kaco {
 		///                 are postfixed with "K". E.g. 1000000->"1M", 500000->"500K" and 5000->"5K".
 		/// \returns true if successful
 		/// \remark Master must not run yet.
-		bool start(const std::string busname, const unsigned baudrate);
-		
+		bool start(CANBUSDevice device, const std::string busname, const unsigned baudrate);
+
 		/// Stops master and core.
 		void stop();
 

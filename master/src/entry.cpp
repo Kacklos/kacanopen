@@ -28,7 +28,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #include "entry.h"
 #include "canopen_error.h"
 
@@ -70,7 +70,7 @@ void Entry::set_value(const Value& value) {
 
 	{
 		std::lock_guard<std::recursive_mutex> lock(*m_read_write_mutex);
-		
+
 		if (m_value.type != type || m_value != value) {
 			value_changed = true;
 		}
