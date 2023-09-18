@@ -28,7 +28,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #include <iostream>
 #include <chrono>
 #include <future>
@@ -49,14 +49,16 @@ namespace kaco {
 /// This struct contains C-strings for
 /// busname and baudrate and is passed
 /// to a CAN driver
-struct CANBoard {
+struct CANBoard
+{
+    /// Bus device
+    CANBUSDevice device;
 
-	/// Bus name
-	const char * busname;
+    /// Bus name
+    const char * busname;
 
-	/// Baudrate
-	const char * baudrate;
-	
+    /// Baudrate
+    const char * baudrate;
 };
 
 /// This type is returned by the CAN driver
@@ -74,18 +76,18 @@ Core::Core()
 		sdo(*this),
 		pdo(*this)
 	{ }
-	
+
 Core::~Core() {
 	if (m_running) {
 		stop();
 	}
 }
 
-bool Core::start(const std::string busname, const std::string& baudrate) {
+bool Core::start(CANBUSDevice device, const std::string busname, const std::string& baudrate) {
 
 	assert(!m_running);
 
-	CANBoard board = {busname.c_str(), baudrate.c_str()};
+	CANBoard board = {device, busname.c_str(), baudrate.c_str()};
 	m_handle = canOpen_driver(&board);
 
 	if(!m_handle) {
@@ -99,13 +101,13 @@ bool Core::start(const std::string busname, const std::string& baudrate) {
 
 }
 
-bool Core::start(const std::string busname, const unsigned baudrate) {
+bool Core::start(CANBUSDevice device, const std::string busname, const unsigned baudrate) {
 	if (baudrate>=1000000 && baudrate%1000000==0) {
-		return start(busname, std::to_string(baudrate/1000000)+"M");
+		return start(device, busname, std::to_string(baudrate/1000000)+"M");
 	} else if (baudrate>=1000 && baudrate%1000==0) {
-		return start(busname, std::to_string(baudrate/1000)+"K");
+		return start(device, busname, std::to_string(baudrate/1000)+"K");
 	} else {
-		return start(busname, std::to_string(baudrate));
+		return start(device, busname, std::to_string(baudrate));
 	}
 }
 
@@ -168,8 +170,9 @@ void Core::received_message(const Message& message) {
 	}
 
 	// sencondly process known message types
-	switch (message.get_function_code()) {
-		
+	uint8_t fcode = message.get_function_code();
+	switch (fcode) {
+
 		case 0: {
 			DEBUG_LOG("NMT Module Control");
 			DEBUG(message.print();)
@@ -196,7 +199,7 @@ void Core::received_message(const Message& message) {
 			pdo.process_incoming_message(message);
 			break;
 		}
-		
+
 		case 4:
 		case 6:
 		case 8:
@@ -207,13 +210,13 @@ void Core::received_message(const Message& message) {
 			DEBUG(message.print();)
 			break;
 		}
-		
+
 		case 11: {
 			// TODO: This will be process_incoming_server_sdo()
 			sdo.process_incoming_message(message);
 			break;
 		}
-		
+
 		case 12: {
 			// TODO: Implement this for slave functionality
 			// 	-> delegate to sdo.process_incoming_client_sdo()
@@ -221,7 +224,7 @@ void Core::received_message(const Message& message) {
 			DEBUG(message.print();)
 			break;
 		}
-		
+
 		case 14: {
 			// NMT Error Control
 			nmt.process_incoming_message(message);
@@ -241,19 +244,19 @@ void Core::received_message(const Message& message) {
 }
 
 bool Core::send(const Message& message) {
-	
+
 	if (m_lock_send) {
 		m_send_mutex.lock();
 	}
-	
+
 	DEBUG_LOG_EXHAUSTIVE("Sending message:");
 	DEBUG_EXHAUSTIVE(message.print();)
 	uint8_t retval = canSend_driver(m_handle, &message);
-	
+
 	if (m_lock_send) {
 		m_send_mutex.unlock();
 	}
-	
+
 	if (retval != 0) {
 		return false;
 	}

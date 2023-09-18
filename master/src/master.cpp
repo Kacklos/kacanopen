@@ -48,8 +48,8 @@ Master::~Master() {
 	}
 }
 
-bool Master::start(const std::string busname, const std::string& baudrate) {
-	bool success = core.start(busname, baudrate);
+bool Master::start(CANBUSDevice device, const std::string busname, const std::string& baudrate) {
+	bool success = core.start(device, busname, baudrate);
 	if (!success) {
 		return false;
 	}
@@ -60,8 +60,8 @@ bool Master::start(const std::string busname, const std::string& baudrate) {
 	return true;
 }
 
-bool Master::start(const std::string busname, const unsigned baudrate) {
-	bool success = core.start(busname, baudrate);
+bool Master::start(CANBUSDevice device, const std::string busname, const unsigned baudrate) {
+	bool success = core.start(device, busname, baudrate);
 	if (!success) {
 		return false;
 	}
