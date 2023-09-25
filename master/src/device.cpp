@@ -120,6 +120,17 @@ const Value& Device::get_entry(const uint16_t index, const uint8_t subindex, con
 	return entry.get_value();
 }
 
+Entry& Device::get_entry_object(std::string entry_name)
+{
+    const std::string name = Utils::escape(entry_name);
+	if (!has_entry(name)) {
+		throw dictionary_error(dictionary_error::type::unknown_entry, name);
+	}
+	const Address address = m_name_to_address[name];
+	Entry& entry = m_dictionary[address];
+	return entry;
+}
+
 void Device::set_entry(const std::string& entry_name, const Value& value, const WriteAccessMethod access_method) {
 	const std::string name = Utils::escape(entry_name);
 	if (!has_entry(name)) {

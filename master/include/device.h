@@ -28,7 +28,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #pragma once
 
 #include "core.h"
@@ -189,6 +189,29 @@ namespace kaco {
 		/// \todo check access_type from dictionary
 		const Value& get_entry(const uint16_t index, const uint8_t subindex = 0, const ReadAccessMethod access_method = ReadAccessMethod::use_default);
 
+
+        /**
+         * \brief Retrieves the Entry object corresponding to a given entry name. (Added Function)
+         *
+         * [Added Function] This function is an addition to the original library.
+         * This method is used to get a reference to the Entry object associated with
+         * a particular entry name in the device's dictionary. The Entry object provides
+         * additional information like type, value, and access methods.
+         *
+         * \param[in] entry_name The name of the entry to fetch. This should be the name as specified in the device's dictionary.
+         *
+         * \return A reference to the Entry object corresponding to the given entry name.
+         *
+         * \throw dictionary_error Thrown when the entry name is not found in the device's dictionary.
+         *
+         * \note This is a newly added function to the library.
+         *
+         * \example
+         *    kaco::Entry& entry = device.get_entry_object("Velocity");
+         */
+        Entry& get_entry_object(std::string entry_name);
+
+
 		/// Sets the value of a dictionary entry by name internally.
 		/// If the entry is configured to send an SDO on update, the new value is also sent to the device via SDO.
 		/// If a PDO is configured on the corresponding entry, it will from now on use the new value stored internally.
@@ -250,7 +273,7 @@ namespace kaco {
 		/// Adds a transmit PDO mapping. This means values from the dictionary cache are sent to the device.
 		///
 		/// Example:
-		/// 
+		///
 		/// 	The following command maps the "Controlword" entry (2 bytes, see CiA 402)
 		///		to the first two bytes of the PDO channel with cob_id 0x206 (RPDO1 of CANOpen device 6),
 		///		and the "Target Position" entry (4 bytes, see CiA 402) to bytes 2-5 of this PDO channel.
