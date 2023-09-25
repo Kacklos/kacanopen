@@ -28,7 +28,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #include "device.h"
 #include "core.h"
 #include "utils.h"
@@ -48,14 +48,14 @@ namespace kaco {
 Device::Device(Core& core, uint8_t node_id)
 	: m_core(core), m_node_id(node_id), m_eds_library(m_dictionary, m_name_to_address) { }
 
-Device::~Device() 
+Device::~Device()
 	{ }
 
-void Device::start() {
+void Device::start(std::string path) {
 
 	m_core.nmt.send_nmt_message(m_node_id,NMT::Command::start_node);
 
-	if (!m_eds_library.lookup_library()) {
+	if (!m_eds_library.lookup_library(path)) {
 		throw canopen_error("[Device::start] EDS library not found. If and only if you make sure for yourself, that mandatory"
 			" entries and operations are available, you can catch this error and go on.");
 	}
@@ -178,7 +178,7 @@ void Device::add_receive_pdo_mapping(uint16_t cob_id, const std::string& entry_n
 		throw dictionary_error(dictionary_error::type::mapping_size, name,
 			"offset ("+std::to_string(offset)+") + type_size ("+std::to_string(type_size)+") > 8.");
 	}
-	
+
 
 	ReceivePDOMapping *pdo_temp;
 
@@ -187,7 +187,7 @@ void Device::add_receive_pdo_mapping(uint16_t cob_id, const std::string& entry_n
 		m_receive_pdo_mappings.push_front({cob_id,name,offset});
 		pdo_temp = &m_receive_pdo_mappings.front();
 	}
-	
+
 	ReceivePDOMapping& pdo = *pdo_temp;
 
 	// TODO: this only works while add_pdo_received_callback takes callback by value.
@@ -207,7 +207,7 @@ void Device::add_transmit_pdo_mapping(uint16_t cob_id, const std::vector<Mapping
 		m_transmit_pdo_mappings.emplace_front(m_core, m_dictionary, m_name_to_address, cob_id, transmission_type, repeat_time, mappings);
 		pdo_temp = &m_transmit_pdo_mappings.front();
 	}
-	
+
 	TransmitPDOMapping& pdo = *pdo_temp;
 
 	if (transmission_type==TransmissionType::ON_CHANGE) {
@@ -249,7 +249,7 @@ void Device::add_transmit_pdo_mapping(uint16_t cob_id, const std::vector<Mapping
 }
 
 void Device::pdo_received_callback(const ReceivePDOMapping& mapping, std::vector<uint8_t> data) {
-	
+
 	DEBUG_LOG("[Device::pdo_received_callback] Received a PDO for mapping '"<<mapping.entry_name<<"'!");
 
 	const std::string entry_name = Utils::escape(mapping.entry_name);
@@ -295,7 +295,7 @@ Value Device::get_entry_via_sdo(uint32_t index, uint8_t subindex, Type type) {
 			}
 		}
 	}
-	
+
 	throw sdo_error(sdo_error::type::response_timeout, "Device::get_entry_via_sdo() device " + std::to_string(m_node_id) + " failed after "
 		+std::to_string(Config::repeats_on_sdo_timeout+1)+" repeats. Last error: "+std::string(last_error.what()));
 
@@ -339,7 +339,7 @@ std::string Device::load_dictionary_from_library() {
 	Config::eds_library_clear_dictionary = true;
 	const bool success = m_eds_library.load_manufacturer_eds(*this);
 	Config::eds_library_clear_dictionary = false;
-	
+
 	if (success) {
 		DEBUG_LOG("[Device::load_dictionary_from_library] Device "<<std::to_string(m_node_id)<<": Successfully loaded manufacturer-specific dictionary: " << m_eds_library.get_most_recent_eds_file_path());
 		DEBUG_LOG("[Device::load_dictionary_from_library] Now we will add additional mappings from standard conformal entry names to the entries...");

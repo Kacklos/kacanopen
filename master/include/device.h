@@ -28,7 +28,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #pragma once
 
 #include "core.h"
@@ -112,7 +112,7 @@ namespace kaco {
 		/// Starts the node via NMT protocol and loads
 		/// mandatory entries, operations, and constants.
 		/// \todo Add m_started member?
-		void start();
+		void start(std::string path = "");
 
 		/// Tries to load the most specific EDS file available in KaCanOpen's internal EDS library.
 		/// This is either device specific, CiA profile specific, or mandatory CiA 301.
@@ -250,7 +250,7 @@ namespace kaco {
 		/// Adds a transmit PDO mapping. This means values from the dictionary cache are sent to the device.
 		///
 		/// Example:
-		/// 
+		///
 		/// 	The following command maps the "Controlword" entry (2 bytes, see CiA 402)
 		///		to the first two bytes of the PDO channel with cob_id 0x206 (RPDO1 of CANOpen device 6),
 		///		and the "Target Position" entry (4 bytes, see CiA 402) to bytes 2-5 of this PDO channel.
