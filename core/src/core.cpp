@@ -34,6 +34,7 @@
 #include <future>
 #include <string>
 #include <cassert>
+#include <algorithm>
 
 #include "logger.h"
 #include "core.h"
@@ -139,6 +140,21 @@ void Core::receive_loop(std::atomic<bool>& running) {
 void Core::register_receive_callback(const MessageReceivedCallback& callback) {
 	std::lock_guard<std::mutex> scoped_lock(m_receive_callbacks_mutex);
 	m_receive_callbacks.push_back(callback);
+}
+
+void Core::deregister_receive_callback(const MessageReceivedCallback& callback_to_remove) {
+    std::lock_guard<std::mutex> scoped_lock(m_receive_callbacks_mutex);
+
+    auto it = std::remove_if(m_receive_callbacks.begin(), m_receive_callbacks.end(),
+                             [&callback_to_remove](const MessageReceivedCallback& registered_callback) {
+                                 // Assuming the callback function pointers can be compared for equality.
+                                 // Adjust this comparison if the callback cannot be directly compared.
+                                 return registered_callback.target_type() == callback_to_remove.target_type();
+                             });
+
+    if (it != m_receive_callbacks.end()) {
+        m_receive_callbacks.erase(it);
+    }
 }
 
 void Core::received_message(const Message& message) {

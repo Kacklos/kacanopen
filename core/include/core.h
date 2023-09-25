@@ -109,6 +109,23 @@ namespace kaco {
 		/// \remark thread-safe
 		void register_receive_callback(const MessageReceivedCallback& callback);
 
+        /**
+         * \brief Deregisters a previously registered message receive callback. (Added Function)
+         *
+         * [Added Function] This function is an addition to the original library.
+         * It removes a callback from the list of functions that are called whenever
+         * a new CANopen message is received. The callback to be removed is identified
+         * by the function object passed as the parameter.
+         *
+         * \param callback_to_remove The callback function object to be deregistered.
+         *
+         * \note The function uses the target type of the std::function to find the
+         * callback to be removed. This assumes that each callback has a unique target type.
+         *
+         * \warning If the function fails to find the specified callback, it silently does nothing.
+         */
+		void deregister_receive_callback(const MessageReceivedCallback& callback_to_remove);
+
 		/// The NMT sub-protocol
 		NMT nmt;
 
