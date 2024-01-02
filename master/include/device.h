@@ -112,7 +112,7 @@ namespace kaco {
 		/// Starts the node via NMT protocol and loads
 		/// mandatory entries, operations, and constants.
 		/// \todo Add m_started member?
-		void start();
+		void start(std::string path = "");
 
 		/// Tries to load the most specific EDS file available in KaCanOpen's internal EDS library.
 		/// This is either device specific, CiA profile specific, or mandatory CiA 301.
